@@ -1,0 +1,2 @@
+rootProject.name='livedata'
+include ':app', ':livedata'

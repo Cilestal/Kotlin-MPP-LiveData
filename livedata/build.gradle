@@ -1,0 +1,96 @@
+apply plugin: 'kotlin-multiplatform'
+apply plugin: 'com.android.library'
+
+apply from: rootProject.file("${rootDir}/config/version.gradle")
+
+android {
+    compileSdkVersion compile_sdk_version
+    buildToolsVersion build_tools_version
+
+    defaultConfig {
+        minSdkVersion min_sdk_version
+        targetSdkVersion target_sdk_version
+        versionCode versionMajor * 10**6 + versionMinor * 10**4 + versionPatch * 10**2 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    lintOptions {
+        abortOnError false
+        ignoreWarnings true
+        quiet true
+    }
+
+    buildTypes {
+        debug {
+
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        pickFirst 'META-INF/*.kotlin_module'
+    }
+
+    sourceSets {
+        main {
+            setRoot('src/androidMain')
+        }
+    }
+}
+
+kotlin {
+
+    targets {
+        jvm()
+
+        final def iOSTarget = System.getenv('SDK_NAME')?.startsWith("iphoneos")       \
+                                    ? presets.iosArm64 : presets.iosX64
+
+        fromPreset(iOSTarget, 'iOS')
+
+        fromPreset(presets.android, 'android')
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+            }
+        }
+
+        jvmMain {
+            dependsOn commonMain
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
+            }
+        }
+
+        iOSMain {
+            dependsOn commonMain
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$kotlin_coroutines_version"
+            }
+        }
+
+        androidMain {
+            dependsOn commonMain
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+                implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+            }
+        }
+    }
+}
