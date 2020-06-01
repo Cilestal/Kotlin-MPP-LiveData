@@ -1,2 +1,4 @@
-rootProject.name='livedata'
+enableFeaturePreview('GRADLE_METADATA')
+
+rootProject.name='mpp-livedata'
 include ':app', ':livedata'
